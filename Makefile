@@ -21,7 +21,6 @@ lib/libphoton.a: $(OBJ)
 
 tester: test/tester.cpp
 	g++ $(CFLAGS) -Llib $^ -o $@ -lphoton -lGL -lglfw -lGLEW 
-	mv tester test/tester
 
 #tester: test/tester.cpp
 #	g++ $(CFLAGS) -Llib $^ -o $@ -lphoton -lGL -lglfw -lGLEW 
@@ -30,4 +29,4 @@ tester: test/tester.cpp
 
 .PHONY: clean
 clean:
-	rm -f $(OBJ)
+	rm -f $(OBJ) tester
