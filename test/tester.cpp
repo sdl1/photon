@@ -63,7 +63,7 @@ int main()
 
   photon::shapes::Cube cube(1.0f);
 
-  photon::Shader shader("shader.vert", "shader.frag");
+  photon::Shader shader("test/shader.vert", "test/shader.frag");
 
 //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -99,7 +99,7 @@ int main()
     //glm::mat4 tmp = projection * view * model;
     //std::cout << glm::to_string(tmp) << "\n";
 
-    TODO scene root, camera transform per node etc
+    //TODO scene root, camera transform per node etc
     cube.Render();
 
     glfwSwapBuffers(window);

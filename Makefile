@@ -19,7 +19,7 @@ lib/libphoton.a: $(OBJ)
 %.o : %.cpp
 	g++ $(CFLAGS) -fPIC -c $^ -o $@
 
-tester: test/tester.cpp
+tester: lib/libphoton.a test/tester.cpp
 	g++ $(CFLAGS) -Llib $^ -o $@ -lphoton -lGL -lglfw -lGLEW 
 
 #tester: test/tester.cpp

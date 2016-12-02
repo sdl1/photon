@@ -19,7 +19,11 @@ namespace photon
                                    2, 3, 0};
 
       this->mesh = new photon::Mesh(vertices, 4, indices);
-      // TODO delete
+    }
+
+    Cube::~Cube()
+    {
+      delete this->mesh;
     }
 
     void Cube::RenderMe()

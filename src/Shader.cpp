@@ -70,9 +70,12 @@ namespace photon
   {
     // TODO improve this
     std::stringstream output;
-    std::ifstream file;
     std::string line;
-    file.open(filename);
+    std::ifstream file(filename);
+    if(!file)
+    {
+      std::cerr << "Couldn't open file: " << filename << "\n";
+    }
     while(getline(file, line))
     {
       output << line << std::endl;

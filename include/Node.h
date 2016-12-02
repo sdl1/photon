@@ -10,6 +10,7 @@ namespace photon
       void Render();
 
     protected:
+      virtual ~Node();
       virtual void RenderMe() = 0;
 
   };

@@ -12,6 +12,7 @@ namespace photon
     {
       public:
         Cube(float L);
+        virtual ~Cube();
 
       private:
         float L;
