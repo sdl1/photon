@@ -20,8 +20,9 @@ namespace photon
     std::vector<Vertex> vertices(numVertices);
     for(int i=0 ; i<numVertices ;i++)
     {
-      vertices[i].Position = glm::vec3(v[i*6 + 0], v[i*6 + 1], v[i*6 + 2]);
-      vertices[i].Color = glm::vec3(v[i*6 + 3], v[i*6 + 4], v[i*6 + 5]);
+      vertices[i].Position = glm::vec3(v[i*9 + 0], v[i*9 + 1], v[i*9 + 2]);
+      vertices[i].Normal = glm::vec3(v[i*9 + 3], v[i*9 + 4], v[i*9 + 5]);
+      vertices[i].Color = glm::vec3(v[i*9 + 6], v[i*9 + 7], v[i*9 + 8]);
     }
     this->vertices = vertices;
     this->setup();
@@ -50,9 +51,12 @@ namespace photon
     // Position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(0);
-    // Colour attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));
+    // Normal attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
     glEnableVertexAttribArray(1);
+    // Colour attribute
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));
+    glEnableVertexAttribArray(2);
 
     // vertex attribute 0 is now associated with the data in VBO
     // 4. Unbind the VAO
@@ -62,9 +66,9 @@ namespace photon
   void Mesh::draw()
   {
     glBindVertexArray(this->VAO);
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     // With indices (element buffer object)
-    glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+    //glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
   }
 

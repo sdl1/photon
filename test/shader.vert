@@ -1,21 +1,26 @@
 #version 330 core
 
 layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 color;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec3 color;
 
-out vec3 vertexColor;
+out vec3 vertex_color;
+out vec3 vertex_normal_worldspace;
+out vec3 frag_pos_worldspace;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform float offset;
-
 void main()
 {
-  //gl_Position = vec4(position.x + offset, position.yz, 1.0);
-  //gl_Position = vec4(position.xyz, 1.0);
   gl_Position = projection * view * model * vec4(position, 1.0f);
-  //vertexColor = color + gl_Position.xyz;//vec4(0.5, 0, 0, 1);
-  vertexColor = color;
+
+  vertex_color = color;
+
+	// Normal matrix to transform normal into worldspace
+	// TODO move normal matrix calc out of shader
+	vertex_normal_worldspace = mat3(transpose(inverse(model))) * normal;
+
+	frag_pos_worldspace = vec3(model * vec4(position, 1.0f));
 }

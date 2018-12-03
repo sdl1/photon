@@ -1,10 +1,12 @@
+all : tester
+
 SRC:=$(wildcard src/*.cpp)
 OBJ:=$(subst .cpp,.o,$(SRC))
 LIB:=lib/libphoton.so
 
 INC=include
 
-CFLAGS=-Wall -std=c++11 -I$(INC)
+CFLAGS=-Wall -std=c++14 -I$(INC)
 
 lib/libphoton.a: $(OBJ)
 	ar rcs libphoton.a $^

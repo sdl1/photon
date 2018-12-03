@@ -23,14 +23,14 @@ namespace photon
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vsrc, nullptr);
     glCompileShader(vertexShader);
-    checkShaderForErrors(vertexShader);
+    checkShaderForErrors(vertexShader, vertexShaderFilename);
 
     std::string fshader_src = readFromFile(fragmentShaderFilename);
     const char* fsrc = fshader_src.c_str();
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fsrc, nullptr);
     glCompileShader(fragmentShader);
-    checkShaderForErrors(fragmentShader);
+    checkShaderForErrors(fragmentShader, fragmentShaderFilename);
 
     this->program = glCreateProgram();
     glAttachShader(this->program, vertexShader);
@@ -66,6 +66,15 @@ namespace photon
       glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(val));
     }
 
+  template<>
+    void Shader::setUniform(std::string uniformName, glm::vec3 val)
+    {
+      this->use();
+      // TODO error handling - exceptions
+      GLuint uniformLoc = glGetUniformLocation(this->program, uniformName.c_str());
+      glUniform3fv(uniformLoc, 1, glm::value_ptr(val));
+    }
+
   std::string Shader::readFromFile(std::string filename) const
   {
     // TODO improve this
@@ -84,7 +93,7 @@ namespace photon
     return output.str();
   }
 
-  void Shader::checkShaderForErrors(GLuint shader) const
+  void Shader::checkShaderForErrors(GLuint shader, std::string shaderFilename) const
   {
     GLint success;
     GLchar infoLog[512];
@@ -92,7 +101,7 @@ namespace photon
     if(!success)
     {
       glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-      std::cout << "Error in shader compilation:\n" << infoLog << "\n";
+      std::cout << "Error compiling " << shaderFilename << ":\n" << infoLog << "\n";
     }
   }
 

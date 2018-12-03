@@ -15,7 +15,7 @@ namespace photon
     private:
       GLuint program;
       std::string readFromFile(std::string filename) const;
-      void checkShaderForErrors(GLuint shader) const;
+      void checkShaderForErrors(GLuint shader, std::string shaderFilename) const;
       void checkProgramForErrors(GLuint program) const;
       std::string vertexShaderFilename;
       std::string fragmentShaderFilename;
