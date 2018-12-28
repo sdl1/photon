@@ -44,9 +44,11 @@ int main()
   Scene scene;
 
   // Shaders
-  photon::Shader lightshader("test/lightshader.vert", "test/lightshader.frag");
-  photon.getShader(0).setUniform("light_color", glm::vec3(1,1,1));
-  photon.getShader(0).setUniform("light_pos", scene.light->getPosition());
+  photon::Shader defaultshader("shaders/default.vert", "shaders/default.frag");
+  photon::Shader lightshader("shaders/lightshader.vert", "shaders/lightshader.frag");
+  defaultshader.setUniform("light_color", glm::vec3(1,1,1));
+  defaultshader.setUniform("light_pos", scene.light->getPosition());
+  photon.setShader(0, defaultshader);
   photon.setShader(1, lightshader);
   scene.light->setShaderType(1);
 
