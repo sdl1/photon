@@ -23,6 +23,7 @@ namespace photon
       void draw();
 
     private:
+      int numVertices;
       std::vector<Vertex> vertices;
       std::vector<GLuint> indices;
       // Vertex array object

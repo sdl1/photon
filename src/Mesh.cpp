@@ -14,7 +14,7 @@ namespace photon
   }
 
   Mesh::Mesh(GLfloat v[], int numVertices, std::vector<GLuint> indices) :
-    indices(indices)
+    numVertices(numVertices), indices(indices)
   {
     // TODO can just buffer directly...
     std::vector<Vertex> vertices(numVertices);
@@ -66,7 +66,7 @@ namespace photon
   void Mesh::draw()
   {
     glBindVertexArray(this->VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArrays(GL_TRIANGLES, 0, numVertices);
     // With indices (element buffer object)
     //glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
