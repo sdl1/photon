@@ -67,8 +67,14 @@ namespace photon
   {
     glBindVertexArray(this->VAO);
     glDrawArrays(GL_TRIANGLES, 0, numVertices);
+    glBindVertexArray(0);
+  }
+
+  void Mesh::drawWithIndices()
+  {
+    glBindVertexArray(this->VAO);
     // With indices (element buffer object)
-    //glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
   }
 

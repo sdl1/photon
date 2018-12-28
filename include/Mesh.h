@@ -21,6 +21,7 @@ namespace photon
       // Specify vertices in interleaved form
       Mesh(GLfloat vertices[], int numVertices, std::vector<GLuint>); // texture
       void draw();
+      void drawWithIndices();
 
     private:
       int numVertices;
