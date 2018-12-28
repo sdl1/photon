@@ -18,9 +18,7 @@
 class Scene : public photon::Node
 {
   public:
-    Scene() :
-      cubeshader("test/shader.vert", "test/shader.frag"),
-      lightshader("test/lightshader.vert", "test/lightshader.frag")
+    Scene()
     {
 			ground = new photon::shapes::Square(10.0, glm::vec3(1,0,0));
       light = new photon::shapes::Cube(0.5);
@@ -28,35 +26,14 @@ class Scene : public photon::Node
       cube = new photon::shapes::Cube(1.0, glm::vec3(0,0,1));
       cube->setPosition(glm::vec3(0.0, 0.5, 0.0));
 
-      //photon::Shader cubeshader("test/shader.vert", "test/shader.frag");
-      //photon::Shader lightshader("test/lightshader.vert", "test/lightshader.frag");
-      //this->light->setShader(lightshader);
-      //this->cube->setShader(cubeshader);
-      cubeshader.setUniform("light_color", glm::vec3(1,1,1));
-      cubeshader.setUniform("light_pos", light->getPosition());
-
       addChild(this->ground);
       addChild(this->light);
       addChild(this->cube);
     }
 
-    void Draw(glm::mat4 view, glm::mat4 projection)
-    {
-      lightshader.setUniform("view", view);
-      lightshader.setUniform("projection", projection);
-      ground->Render(lightshader);
-      light->Render(lightshader);
-      cubeshader.setUniform("view", view);
-      cubeshader.setUniform("projection", projection);
-      cube->Render(cubeshader);
-    }
-
-  private:
     photon::shapes::Square *ground;
     photon::shapes::Cube *light;
     photon::shapes::Cube *cube;
-    photon::Shader cubeshader;
-    photon::Shader lightshader;
 };
 
 int main()
@@ -65,6 +42,13 @@ int main()
   photon::Photon photon;
 
   Scene scene;
+
+  // Shaders
+  photon::Shader lightshader("test/lightshader.vert", "test/lightshader.frag");
+  photon.getShader(0).setUniform("light_color", glm::vec3(1,1,1));
+  photon.getShader(0).setUniform("light_pos", scene.light->getPosition());
+  photon.setShader(1, lightshader);
+  scene.light->setShaderType(1);
 
 //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_CULL_FACE);
@@ -90,10 +74,11 @@ int main()
   GLfloat dt = 1.0;
 
   // Render to image
-  photon::RenderTargetImage image("tester.bmp");
-  glm::mat4 view = camera.getView();
-  photon.setRenderTarget(image);
-  scene.Draw(view, projection);
+  //photon::RenderTargetImage image("tester.bmp");
+  //glm::mat4 view = camera.getView();
+  //photon.setRenderTarget(image);
+  ////scene.Draw(view, projection);
+  //scene.Render();
 
   // Render to screen
   photon.setDefaultRenderTarget();
@@ -107,7 +92,7 @@ int main()
     camera.processInput(photon.getWindow(), dt);
     glm::mat4 view = camera.getView();
 
-    scene.Draw(view, projection);
+    photon.Render(scene, view, projection);
 
     photon.swapBuffers();
     GLfloat newtime = glfwGetTime();

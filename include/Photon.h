@@ -1,6 +1,7 @@
 #ifndef PHOTON_H
 #define PHOTON_H
 
+#include <map>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -29,10 +30,16 @@ namespace photon
       void setRenderTarget(photon::RenderTarget&);
       void setDefaultRenderTarget();
 
+      void setShader(unsigned int shaderType, Shader shader);
+      Shader& getShader(unsigned int shaderType) { return shaderMap[shaderType]; };
+
+      virtual void Render(Node &node, glm::mat4 view, glm::mat4 projection, glm::mat4 model = glm::mat4());
+
     private:
       int width;
       int height;
       GLFWwindow *window;
+      std::map<unsigned int, Shader> shaderMap;
   };
 
 }

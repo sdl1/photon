@@ -11,20 +11,22 @@ namespace photon
 {
   class Node
   {
+    friend class Photon;
+
     public:
       Node();
       virtual ~Node();
       void addChild(Node *node);
-      virtual void Render();
-      virtual void Render(photon::Shader &shader);
-      virtual void Render(photon::Shader &shader, glm::mat4 model);
       void setPosition(glm::vec3 pos){ this->position = pos; };
       glm::vec3 getPosition(){ return this->position; };
+      unsigned int getShaderType(){ return shaderType; };
+      void setShaderType(unsigned int shaderType){ this->shaderType = shaderType; };
 
     protected:
       virtual void RenderMe();
       std::list<std::unique_ptr<Node> > nodeList;
       glm::vec3 position;
+      unsigned int shaderType;
   };
 }
 

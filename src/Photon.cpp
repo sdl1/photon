@@ -1,6 +1,7 @@
 #include "Photon.h"
 
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace photon
 {
@@ -44,6 +45,9 @@ namespace photon
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_DEPTH_TEST);
+
+    // Default shaders
+    setShader(0, Shader("shaders/default.vert", "shaders/default.frag"));
   }
 
   Photon::~Photon()
@@ -93,4 +97,28 @@ namespace photon
   {
     glBindFramebuffer(GL_FRAMEBUFFER, 0); 
   }
+
+  void Photon::setShader(unsigned int shaderType, Shader shader)
+  {
+    shaderMap[shaderType] = shader;
+  }
+
+  // If model not specified, identity is default
+  void Photon::Render(Node &node, glm::mat4 view, glm::mat4 projection, glm::mat4 model)
+  {
+    // TODO only do below once for each shader
+    Shader shader = shaderMap[node.shaderType];
+    shader.setUniform("view", view);
+    shader.setUniform("projection", projection);
+    shader.use();
+
+    model = glm::translate(model, node.position);
+    shader.setUniform("model", model);
+    node.RenderMe();
+    for(auto const & child : node.nodeList)
+    {
+      Render(*child, view, projection, model); 
+    }
+  }
+
 }

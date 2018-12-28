@@ -15,6 +15,10 @@
 namespace photon
 {
 
+  Shader::Shader()
+  {
+  }
+
   Shader::Shader(std::string vertexShaderFilename, std::string fragmentShaderFilename) :
     vertexShaderFilename(vertexShaderFilename), fragmentShaderFilename(fragmentShaderFilename)
   {

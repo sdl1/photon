@@ -8,6 +8,7 @@ namespace photon
   class Shader
   {
     public:
+      Shader();
       Shader(std::string vertexShaderFilename, std::string fragmentShaderFilename);
       void use() const;
       template<typename T> void setUniform(std::string uniformName, T val);
