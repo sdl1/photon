@@ -6,7 +6,7 @@
 namespace photon
 {
   Photon::Photon() :
-    width(1024), height(768)
+    width(1024), height(768), wireframe(false)
   {
     if(!glfwInit())
     {
@@ -55,12 +55,41 @@ namespace photon
     glfwTerminate();
   }
 
+  void Photon::pressKey(int key)
+  {
+    switch(key)
+    {
+      case GLFW_KEY_ESCAPE:
+        glfwSetWindowShouldClose(window, true);
+        break;
+      case GLFW_KEY_L:
+        wireframe = !wireframe;
+        if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        break;
+    }
+  }
+
+  void Photon::processKeys()
+  {
+    for(int key=GLFW_KEY_SPACE ; key<=GLFW_KEY_LAST ; key++)
+    {
+      if(glfwGetKey(window, key) == GLFW_PRESS && !keydown[key])
+      {
+        keydown[key] = true;
+        pressKey(key);
+      }
+      if(glfwGetKey(window, key) == GLFW_RELEASE)
+      {
+        keydown[key] = false;
+      }
+    }
+
+  }
+
   void Photon::processInput()
   {
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    {
-      glfwSetWindowShouldClose(window, true);
-    }
+    processKeys();
   }
 
   void Photon::pollEvents()

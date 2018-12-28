@@ -40,6 +40,11 @@ namespace photon
       int height;
       GLFWwindow *window;
       std::map<unsigned int, Shader> shaderMap;
+
+      bool wireframe;
+      void pressKey(int);
+      void processKeys();
+      std::map<int, bool> keydown;
   };
 
 }

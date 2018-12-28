@@ -50,7 +50,6 @@ int main()
   photon.setShader(1, lightshader);
   scene.light->setShaderType(1);
 
-//  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
