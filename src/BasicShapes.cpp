@@ -77,6 +77,7 @@ namespace photon
         }
       }
 
+      /*
       std::vector<GLuint> indices {0, 2, 1,
                                    2, 0, 3,
                                    0, 1, 5,
@@ -89,6 +90,11 @@ namespace photon
                                    0, 7, 3,
                                    4, 5, 6,
                                    6, 7, 4};
+                                   */
+
+      std::vector<GLuint> indices(36);
+      for(int i=0 ; i<36 ; i++) indices[i] = i;
+                                   
 
       //this->mesh = new photon::Mesh(vertices, 8, indices);
       this->mesh = new photon::Mesh(vertices, 36, indices);
