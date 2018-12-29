@@ -6,7 +6,7 @@ LIB:=lib/libphoton.so
 
 INC=include
 
-CFLAGS=-Wall -std=c++14 -I$(INC) -g
+CFLAGS=-Wall -std=c++14 -I$(INC) -g -O0
 
 lib/libphoton.a: $(OBJ)
 	ar rcs libphoton.a $^
