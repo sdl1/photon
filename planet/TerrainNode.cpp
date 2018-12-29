@@ -64,16 +64,16 @@ Mesh *generateMesh(glm::vec3 origin, float sideLength, std::function<float(glm::
   return new Mesh(vertices, numVertices, indices);
 }
 
-//TerrainNode::TerrainNode(float L) :
-TerrainNode::TerrainNode(float L, std::function<float(glm::vec3)> height_fn) :
-  L(L)
+TerrainNode::TerrainNode(float L, std::function<float(glm::vec3)> height_fn, glm::vec3 origin) :
+  L(L), height_fn(height_fn), origin(origin)
 {
   float dx = L/2.0;
   // Four quadrants
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(0,0,0), dx, height_fn)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(dx,0,0), dx, height_fn)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(dx,dx,0), dx, height_fn)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(0,dx,0), dx, height_fn)) );
+  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(0,0,0), dx, height_fn)) );
+  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(dx,0,0), dx, height_fn)) );
+  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(dx,dx,0), dx, height_fn)) );
+  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(0,dx,0), dx, height_fn)) );
+  for(int i=0 ; i<4 ; i++) active[i] = true;
 }
 
 TerrainNode::~TerrainNode()
@@ -83,10 +83,64 @@ TerrainNode::~TerrainNode()
 
 void TerrainNode::RenderMe()
 {
-  for(auto const & q : quadrants)
+  for(int i=0 ; i<4 ; i++)
   {
-    q->drawStrip();
+    if(active[i]) quadrants[i]->drawStrip();
   }
+}
+
+void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
+{
+  float mindx = 0.1f;
+  float LIM = 1.0f;
+  // d is distance from camera to centre of a quadrant
+  // dx is width of a quadrant
+  // W = dx/d ~= apparent width of the quadrant
+  // We want W to stay ~constant
+  float dx = L/2.0;
+  // Stop splitting at some point
+  if(dx<=mindx) return;
+
+  // Offset from origin to centre of quandrant
+  const glm::vec3 offset[] = {glm::vec3(dx/2,dx/2,0),
+                              glm::vec3(3*dx/2,dx/2,0),
+                              glm::vec3(3*dx/2,3*dx/2,0),
+                              glm::vec3(dx/2,3*dx/2,0),
+                              };
+  for(int i=0 ; i<4 ; i++)
+  {
+    if(!active[i]) continue;
+
+    float d = length(pos - (origin+offset[i]));
+    float W = dx/std::max(d,0.01f);
+    if(W>LIM)
+    {
+      split(i);
+    }
+  }
+
+  for(auto & child : nodeList)
+  {
+    dynamic_cast<TerrainNode*>(child.get())->updateLOD(pos, front);
+  }
+
+  // TODO merge
+  // TODO enforce difference of 1 between neighbours
+
+  // TODO remove LOD from things we are not facing
+}
+
+void TerrainNode::split(int quadrant)
+{
+  float dx = L/2.0;
+  const glm::vec3 offset[] = {glm::vec3(0,0,0),
+                              glm::vec3(dx,0,0),
+                              glm::vec3(dx,dx,0),
+                              glm::vec3(0,dx,0),
+                              };
+  active[quadrant] = false;
+  glm::vec3 neworigin = origin + offset[quadrant];
+  addChild(new TerrainNode(dx, height_fn, neworigin));
 }
 
 

@@ -29,7 +29,7 @@ class Scene : public photon::Node
         float y = pos[1];
         return sin(x)*cos(y);
       };
-			terrain = new TerrainNode(10.0, f);
+			terrain = new TerrainNode(20.0, f);
 
       addChild(this->centrecube);
       addChild(this->terrain);
@@ -85,6 +85,8 @@ int main()
   photon.setDefaultRenderTarget();
   while(!photon.shouldExit())
   {
+    scene.terrain->updateLOD(camera.getPos(), camera.getFront());
+
     photon.pollEvents();
     photon.processInput();
     // Draw
