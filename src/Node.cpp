@@ -12,6 +12,7 @@ namespace photon
 
   Node::~Node()
   {
+    nodeList.clear();
   }
 
   void Node::addChild(Node *node)
