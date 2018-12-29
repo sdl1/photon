@@ -7,14 +7,12 @@
 class TerrainNode : public photon::Node
 {
   public:
-    TerrainNode(float L);
+    TerrainNode(float L, std::function<float(glm::vec3)> height);
     virtual ~TerrainNode();
 
   private:
     float L;
-    //photon::Mesh *mesh;
     void RenderMe();
-    //std::vector<photon::Mesh*> quadrants;
     std::vector<std::unique_ptr<photon::Mesh> > quadrants;
 };
 

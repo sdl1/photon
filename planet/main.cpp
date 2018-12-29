@@ -20,9 +20,16 @@ class Scene : public photon::Node
     Scene()
     {
       centrecube = new photon::shapes::Cube(0.25);
-			terrain = new TerrainNode(1.0);
       light = new photon::shapes::Cube(0.5);
-      light->setPosition(glm::vec3(2,2,2));
+      light->setPosition(glm::vec3(5,5,2));
+
+      auto f = [](glm::vec3 pos)
+      {
+        float x = pos[0];
+        float y = pos[1];
+        return sin(x)*cos(y);
+      };
+			terrain = new TerrainNode(10.0, f);
 
       addChild(this->centrecube);
       addChild(this->terrain);

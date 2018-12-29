@@ -7,7 +7,7 @@
 using photon::Mesh;
 
 // Origin is bottom-left corner
-Mesh *generateMesh(glm::vec3 origin, float sideLength)
+Mesh *generateMesh(glm::vec3 origin, float sideLength, std::function<float(glm::vec3)> f)
 {
   glm::vec3 colour(rand()/(float)RAND_MAX, rand()/(float)RAND_MAX, rand()/(float)RAND_MAX);
 
@@ -23,13 +23,24 @@ Mesh *generateMesh(glm::vec3 origin, float sideLength)
     for(int c=0 ; c<columns ; c++)
     {
       int idx = r*columns + c;
-      vertices[9*idx + 0] = origin[0] + c*dx;
-      vertices[9*idx + 1] = origin[1] + r*dx;//0;
-      vertices[9*idx + 2] = origin[2] + 0;//-r*dx;
+      float x = origin[0] + c*dx;
+      float y = origin[1] + r*dx;
+      float h = f(glm::vec3(x,y,0));
+      float z = origin[2] + h;
+      vertices[9*idx + 0] = x;
+      vertices[9*idx + 1] = y;
+      vertices[9*idx + 2] = z;
 
-      vertices[9*idx + 3] = 0;
-      vertices[9*idx + 4] = 1;
-      vertices[9*idx + 5] = 0;
+      // normal = -(dhdx, dhdy, -1)
+      float eps = 1e-6;
+      float dhdx = (f(glm::vec3(x+eps,y,0)) - h)/eps;
+      float dhdy = (f(glm::vec3(x,y+eps,0)) - h)/eps;
+      glm::vec3 normal(dhdx, dhdy, -1);
+      normal = -normalize(normal);
+
+      vertices[9*idx + 3] = normal[0];
+      vertices[9*idx + 4] = normal[1];
+      vertices[9*idx + 5] = normal[2];
 
       vertices[9*idx + 6] = colour[0];
       vertices[9*idx + 7] = colour[1];
@@ -53,15 +64,16 @@ Mesh *generateMesh(glm::vec3 origin, float sideLength)
   return new Mesh(vertices, numVertices, indices);
 }
 
-TerrainNode::TerrainNode(float L) :
+//TerrainNode::TerrainNode(float L) :
+TerrainNode::TerrainNode(float L, std::function<float(glm::vec3)> height_fn) :
   L(L)
 {
   float dx = L/2.0;
   // Four quadrants
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(0,0,0), dx)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(dx,0,0), dx)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(dx,dx,0), dx)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(0,dx,0), dx)) );
+  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(0,0,0), dx, height_fn)) );
+  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(dx,0,0), dx, height_fn)) );
+  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(dx,dx,0), dx, height_fn)) );
+  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(glm::vec3(0,dx,0), dx, height_fn)) );
 }
 
 TerrainNode::~TerrainNode()
