@@ -5,7 +5,7 @@ OBJ:=$(subst .cpp,.o,$(SRC))
 
 INC=../include
 
-CFLAGS=-Wall -std=c++14 -I$(INC) -g
+CFLAGS=-Wall -std=c++14 -I$(INC) -g -O0
 
 %.o : %.cpp
 	g++ $(CFLAGS) -fPIC -c $^ -o $@
