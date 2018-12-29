@@ -7,10 +7,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-// TODO automatically reload from file
 
 namespace photon
 {
@@ -21,6 +18,47 @@ namespace photon
 
   Shader::Shader(std::string vertexShaderFilename, std::string fragmentShaderFilename) :
     vertexShaderFilename(vertexShaderFilename), fragmentShaderFilename(fragmentShaderFilename)
+  {
+    reload();
+  }
+
+  void Shader::use() const
+  {
+    glUseProgram(this->program);
+  }
+
+  template<>
+    void Shader::setUniform(std::string uniformName, GLfloat val)
+    {
+      // TODO keep track of current prgram and restore it after...
+      this->use();
+      // TODO error handling - exceptions
+      GLuint uniformLoc = glGetUniformLocation(this->program, uniformName.c_str());
+      glUniform1f(uniformLoc, val);
+      uniformMap_float[uniformName] = val;
+    }
+
+  template<>
+    void Shader::setUniform(std::string uniformName, glm::mat4 val)
+    {
+      this->use();
+      // TODO error handling - exceptions
+      GLuint uniformLoc = glGetUniformLocation(this->program, uniformName.c_str());
+      glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(val));
+      uniformMap_mat4[uniformName] = val;
+    }
+
+  template<>
+    void Shader::setUniform(std::string uniformName, glm::vec3 val)
+    {
+      this->use();
+      // TODO error handling - exceptions
+      GLuint uniformLoc = glGetUniformLocation(this->program, uniformName.c_str());
+      glUniform3fv(uniformLoc, 1, glm::value_ptr(val));
+      uniformMap_vec3[uniformName] = val;
+    }
+
+  void Shader::reload()
   {
     std::string vshader_src = readFromFile(vertexShaderFilename);
     const char* vsrc = vshader_src.c_str();
@@ -44,40 +82,22 @@ namespace photon
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    // Reload uniforms
+    // NOTE: need to keep this up to date
+    for(auto & it : uniformMap_float)
+    {
+      setUniform(it.first, it.second);
+    }
+    for(auto & it : uniformMap_vec3)
+    {
+      setUniform(it.first, it.second);
+    }
+    for(auto & it : uniformMap_mat4)
+    {
+      setUniform(it.first, it.second);
+    }
   }
-
-  void Shader::use() const
-  {
-    glUseProgram(this->program);
-  }
-
-  template<>
-    void Shader::setUniform(std::string uniformName, GLfloat val)
-    {
-      // TODO keep track of current prgram and restore it after...
-      this->use();
-      // TODO error handling - exceptions
-      GLuint uniformLoc = glGetUniformLocation(this->program, uniformName.c_str());
-      glUniform1f(uniformLoc, val);
-    }
-
-  template<>
-    void Shader::setUniform(std::string uniformName, glm::mat4 val)
-    {
-      this->use();
-      // TODO error handling - exceptions
-      GLuint uniformLoc = glGetUniformLocation(this->program, uniformName.c_str());
-      glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(val));
-    }
-
-  template<>
-    void Shader::setUniform(std::string uniformName, glm::vec3 val)
-    {
-      this->use();
-      // TODO error handling - exceptions
-      GLuint uniformLoc = glGetUniformLocation(this->program, uniformName.c_str());
-      glUniform3fv(uniformLoc, 1, glm::value_ptr(val));
-    }
 
   std::string Shader::readFromFile(std::string filename) const
   {

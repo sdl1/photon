@@ -45,6 +45,8 @@ namespace photon
       void pressKey(int);
       void processKeys();
       std::map<int, bool> keydown;
+
+      void reloadShaders();
   };
 
 }

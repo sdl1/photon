@@ -60,9 +60,15 @@ namespace photon
         glfwSetWindowShouldClose(window, true);
         break;
       case GLFW_KEY_L:
+        //TODO proper logging
+        std::cout << "Toggle wireframe\n";
         wireframe = !wireframe;
         if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        break;
+      case GLFW_KEY_R:
+        std::cout << "Reload shaders\n";
+        reloadShaders();
         break;
     }
   }
@@ -144,6 +150,14 @@ namespace photon
     for(auto const & child : node.nodeList)
     {
       Render(*child, view, projection, model); 
+    }
+  }
+
+  void Photon::reloadShaders()
+  {
+    for(auto & it : shaderMap)
+    {
+      it.second.reload();
     }
   }
 
