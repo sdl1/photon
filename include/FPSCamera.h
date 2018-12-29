@@ -12,6 +12,8 @@ namespace photon
       // Pos, front in world space
       FPSCamera(glm::vec3 cameraPos, glm::vec3 cameraFront);
       glm::mat4 getView();
+      glm::vec3 getPos(){ return cameraPos; };
+      glm::vec3 getFront(){ return cameraFront; };
       void processInput(GLFWwindow* window, GLfloat dt);
       void mouse_callback(double xpos, double ypos);
 
