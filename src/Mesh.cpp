@@ -78,4 +78,11 @@ namespace photon
     glBindVertexArray(0);
   }
 
+  void Mesh::drawStrip()
+  {
+    glBindVertexArray(this->VAO);
+    glDrawElements(GL_TRIANGLE_STRIP, this->indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+  }
+
 }

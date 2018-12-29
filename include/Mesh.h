@@ -22,6 +22,7 @@ namespace photon
       Mesh(GLfloat vertices[], int numVertices, std::vector<GLuint>); // texture
       void draw();
       void drawWithIndices();
+      void drawStrip();
 
     private:
       int numVertices;
