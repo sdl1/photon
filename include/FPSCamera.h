@@ -10,7 +10,7 @@ namespace photon
   {
     public:
       // Pos, front in world space
-      FPSCamera(glm::vec3 cameraPos, glm::vec3 cameraFront);
+      FPSCamera(glm::vec3 cameraPos, glm::vec3 cameraFront, float cameraSpeed=2.0f);
       glm::mat4 getView();
       glm::vec3 getPos(){ return cameraPos; };
       glm::vec3 getFront(){ return cameraFront; };

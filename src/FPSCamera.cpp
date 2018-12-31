@@ -5,8 +5,8 @@
 
 namespace photon
 {
-  FPSCamera::FPSCamera(glm::vec3 cameraPos, glm::vec3 cameraFront) :
-    cameraPos(cameraPos), cameraFront(cameraFront), cameraSpeed(2.0), firstMouse(true)
+  FPSCamera::FPSCamera(glm::vec3 cameraPos, glm::vec3 cameraFront, float cameraSpeed) :
+    cameraPos(cameraPos), cameraFront(cameraFront), cameraSpeed(cameraSpeed), firstMouse(true)
   {
     this->setCoords();
   }
