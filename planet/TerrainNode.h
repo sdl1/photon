@@ -19,6 +19,7 @@ class TerrainNode : public photon::Node
     void RenderMe();
     std::vector<std::unique_ptr<photon::Mesh> > quadrants;
     bool active[4];
+    glm::vec3 quadrantCentres[4];
 };
 
 #endif

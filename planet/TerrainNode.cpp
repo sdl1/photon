@@ -73,7 +73,20 @@ TerrainNode::TerrainNode(float L, std::function<float(glm::vec3)> height_fn, glm
   quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(dx,0,0), dx, height_fn)) );
   quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(dx,dx,0), dx, height_fn)) );
   quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(0,dx,0), dx, height_fn)) );
-  for(int i=0 ; i<4 ; i++) active[i] = true;
+
+  for(int i=0 ; i<4 ; i++)
+  {
+    active[i] = true;
+  }
+
+  quadrantCentres[0] = glm::vec3(dx/2, dx/2, 0);
+  quadrantCentres[1] = glm::vec3(3*dx/2, dx/2, 0);
+  quadrantCentres[2] = glm::vec3(3*dx/2, 3*dx/2, 0);
+  quadrantCentres[3] = glm::vec3(dx/2, 3*dx/2, 0);
+  for(int i=0 ; i<4 ; i++)
+  {
+    quadrantCentres[i][2] = height_fn(quadrantCentres[i]);
+  }
 }
 
 TerrainNode::~TerrainNode()
@@ -101,18 +114,12 @@ void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
   // Stop splitting at some point
   if(dx<=mindx) return;
 
-  // Offset from origin to centre of quandrant
-  const glm::vec3 offset[] = {glm::vec3(dx/2,dx/2,0),
-                              glm::vec3(3*dx/2,dx/2,0),
-                              glm::vec3(3*dx/2,3*dx/2,0),
-                              glm::vec3(dx/2,3*dx/2,0),
-                              };
   for(int i=0 ; i<4 ; i++)
   {
     if(!active[i]) continue;
 
-    float d = length(pos - (origin+offset[i]));
-    float W = dx/std::max(d,0.01f);
+    float d = length(pos - (origin + quadrantCentres[i]));
+    float W = dx/std::max(d, 1e-6f);
     if(W>LIM)
     {
       split(i);
