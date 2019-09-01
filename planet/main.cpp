@@ -22,17 +22,17 @@ class Scene : public photon::Node
     {
       centrecube = new photon::shapes::Cube(0.25);
       light = new photon::shapes::Cube(0.5);
-      light->setPosition(glm::vec3(5,5,2));
+      light->setPosition(glm::vec3(5,5,20));
 
       auto f = [](glm::vec3 pos)
       {
         float x = pos[0];
         float y = pos[1];
-        return 0.0; //sin(x)*cos(y);
+        return sin(x)*cos(y);
       };
 			//terrain = new TerrainNode(20.0, f);
 			//terrain = new TerrainNode(12e6, f);
-			planet = new Planet(2.0, f);
+			planet = new Planet(10.0, f);
 
       addChild(this->centrecube);
       //addChild(this->terrain);

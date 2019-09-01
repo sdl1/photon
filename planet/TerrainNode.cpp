@@ -3,6 +3,7 @@
 #include "TerrainNode.h"
 
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 using photon::Mesh;
 
@@ -67,6 +68,7 @@ Mesh *generateMesh(glm::vec3 origin, float sideLength, std::function<float(glm::
 TerrainNode::TerrainNode(float L, std::function<float(glm::vec3)> height_fn, glm::vec3 origin) :
   L(L), height_fn(height_fn), origin(origin)
 {
+  // TODO remove origin, it's redundant
   mesh = generateMesh(origin, L, height_fn);
   active = true;
   quadrantCentre = origin + glm::vec3(L/2, L/2, 0);
@@ -83,12 +85,19 @@ void TerrainNode::RenderMe()
   if(active) mesh->drawStrip();
 }
 
-void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
+void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front, glm::mat4 model)
 {
+  // The model matrix is accumulated to children, so that we calcualte the distance in world space
+  // Get the quadrant centre in worldspace
+  // TODO tidy this up in photon, we should be able to directly access the model matrix for this node
+  model = glm::translate(model, this->position);
+  model = model * this->rotation;
+  glm::vec3 worldQuadrantCentre = glm::vec3(model*glm::vec4(quadrantCentre, 1.0));
+
   // Recurse to children first
   for(auto & child : nodeList)
   {
-    dynamic_cast<TerrainNode*>(child.get())->updateLOD(pos, front);
+    dynamic_cast<TerrainNode*>(child.get())->updateLOD(pos, front, model);
   }
 
   float minL = 0.1f;
@@ -97,14 +106,16 @@ void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
   // L is width of a quadrant
   // W = L/d ~= apparent width of the quadrant
   // We want W to stay ~constant
+  float d = length(pos - worldQuadrantCentre);
+
+  //float d = length(pos - quadrantCentre);
+  float W = L/std::max(d, 1e-6f);
 
   // Active quadrants are candidates for splitting
   // Stop splitting at some point
   if(active && L>minL)
   {
     // Split the quadrant if it appears too big
-    float d = length(pos - quadrantCentre);
-    float W = L/std::max(d, 1e-6f);
     if(W>LIM)
     {
       split();
@@ -132,8 +143,6 @@ void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
       // Merge the quadrant if it doesn't appear too big
       // It's important that this is consistent with the
       // splitting criterion, to avoid loops
-      float d = length(pos - quadrantCentre);
-      float W = L/std::max(d, 1e-6f);
       if(W<=LIM)
       {
         merge();

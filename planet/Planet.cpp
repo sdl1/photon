@@ -54,5 +54,9 @@ void Planet::RenderMe()
 
 void Planet::updateLOD(glm::vec3 pos, glm::vec3 front)
 {
+  for(auto & child : nodeList)
+  {
+    dynamic_cast<TerrainNode*>(child.get())->updateLOD(pos, front);
+  }
 }
 
