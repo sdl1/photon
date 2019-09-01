@@ -30,6 +30,7 @@ class Scene : public photon::Node
         return sin(x)*cos(y);
       };
 			terrain = new TerrainNode(20.0, f);
+			//terrain = new TerrainNode(12e6, f);
 
       addChild(this->centrecube);
       addChild(this->terrain);
@@ -67,7 +68,8 @@ int main()
   //glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
   glm::vec3 cameraPos(0.0f, 0.0f, 5.0f);
   glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
-  photon::FPSCamera camera(cameraPos, cameraFront);
+  float cameraSpeed = 2.0;//10.0;
+  photon::FPSCamera camera(cameraPos, cameraFront, cameraSpeed);
 
   // Capture and hide cursor
   glfwSetInputMode(photon.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);

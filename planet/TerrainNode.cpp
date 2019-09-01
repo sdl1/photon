@@ -104,6 +104,12 @@ void TerrainNode::RenderMe()
 
 void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
 {
+  // Recurse to children first
+  for(auto & child : nodeList)
+  {
+    dynamic_cast<TerrainNode*>(child.get())->updateLOD(pos, front);
+  }
+
   float mindx = 0.1f;
   float LIM = 1.0f;
   // d is distance from camera to centre of a quadrant
@@ -111,13 +117,16 @@ void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
   // W = dx/d ~= apparent width of the quadrant
   // We want W to stay ~constant
   float dx = L/2.0;
-  // Stop splitting at some point
-  if(dx<=mindx) return;
 
+  // SPLITTING
   for(int i=0 ; i<4 ; i++)
   {
+    // Active quadrants are candidates for splitting
     if(!active[i]) continue;
+    // Stop splitting at some point
+    if(dx<=mindx) break;
 
+    // Split the quadrant if it appears too big
     float d = length(pos - (origin + quadrantCentres[i]));
     float W = dx/std::max(d, 1e-6f);
     if(W>LIM)
@@ -126,9 +135,32 @@ void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
     }
   }
 
-  for(auto & child : nodeList)
+  // MERGING
+  for(int i=0 ; i<4 ; i++)
   {
-    dynamic_cast<TerrainNode*>(child.get())->updateLOD(pos, front);
+    // Non-active quadrants are candidates for merging
+    if(active[i]) continue;
+    // A non-active quadrant corresponds to a child TerrainNode.
+    // We only merge this quadrant if all the quadrants of the
+    // child TerrainNode are active, i.e. the child TerrainNode
+    // is not split.
+    bool allChildrenActive = true;
+    for(int j=0 ; j<4 ; j++)
+    {
+      allChildrenActive = allChildrenActive && children[i]->active[j];
+    }
+    if(!allChildrenActive) continue;
+
+
+    // Merge the quadrant if it doesn't appear too big
+    // It's important that this is consistent with the
+    // splitting criterion, to avoid loops
+    float d = length(pos - (origin + quadrantCentres[i]));
+    float W = dx/std::max(d, 1e-6f);
+    if(W<=LIM)
+    {
+      merge(i);
+    }
   }
 
   // TODO merge
@@ -139,6 +171,9 @@ void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
 
 void TerrainNode::split(int quadrant)
 {
+  assert(active[quadrant]);
+  std::cout << "Splitting\n";
+  // TODO just re-activate children rather than deleting
   float dx = L/2.0;
   const glm::vec3 offset[] = {glm::vec3(0,0,0),
                               glm::vec3(dx,0,0),
@@ -148,6 +183,17 @@ void TerrainNode::split(int quadrant)
   active[quadrant] = false;
   glm::vec3 neworigin = origin + offset[quadrant];
   addChild(new TerrainNode(dx, height_fn, neworigin));
+  children[quadrant] = dynamic_cast<TerrainNode*>(nodeList.back().get());
+}
+
+void TerrainNode::merge(int quadrant)
+{
+  assert(!active[quadrant]);
+  std::cout << "Merging\n";
+  // TODO just de-activate children rather than deleting
+  nodeList.clear();
+  // Re-active this quadrant
+  active[quadrant] = true;
 }
 
 

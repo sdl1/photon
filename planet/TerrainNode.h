@@ -11,6 +11,7 @@ class TerrainNode : public photon::Node
     virtual ~TerrainNode();
     void updateLOD(glm::vec3 pos, glm::vec3 front);
     void split(int quadrant);
+    void merge(int quadrant);
 
   private:
     float L;
@@ -19,6 +20,7 @@ class TerrainNode : public photon::Node
     void RenderMe();
     std::vector<std::unique_ptr<photon::Mesh> > quadrants;
     bool active[4];
+    TerrainNode const * children[4];
     glm::vec3 quadrantCentres[4];
 };
 
