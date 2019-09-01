@@ -6,6 +6,7 @@ namespace photon
 
   Node::Node() :
     position(glm::vec3(0.0f, 0.0f, 0.0f)),
+    rotation(glm::mat4()),
     shaderType(0)
   {
   }

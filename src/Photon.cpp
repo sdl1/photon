@@ -144,7 +144,9 @@ namespace photon
     shader.setUniform("projection", projection);
     shader.use();
 
+    // TODO pre-compute the entire model matrix
     model = glm::translate(model, node.position);
+    model = model * node.rotation;
     shader.setUniform("model", model);
     node.RenderMe();
     for(auto const & child : node.nodeList)

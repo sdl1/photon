@@ -23,6 +23,7 @@ class Scene : public photon::Node
 			ground = new photon::shapes::Square(10.0, glm::vec3(1,0,0));
       light = new photon::shapes::Cube(0.5);
       light->setPosition(glm::vec3(-1,2,0.5));
+      light->setRotation(glm::rotate(glm::mat4(), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
       cube = new photon::shapes::Cube(1.0, glm::vec3(0,0,1));
       cube->setPosition(glm::vec3(0.0, 0.5, 0.0));
 

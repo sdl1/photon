@@ -19,6 +19,8 @@ namespace photon
       void addChild(Node *node);
       void setPosition(glm::vec3 pos){ this->position = pos; };
       glm::vec3 getPosition(){ return this->position; };
+      void setRotation(glm::mat4 rot){ this->rotation = rot; };
+      glm::mat4 getRotation(){ return this->rotation; };
       unsigned int getShaderType(){ return shaderType; };
       void setShaderType(unsigned int shaderType){ this->shaderType = shaderType; };
 
@@ -26,6 +28,7 @@ namespace photon
       virtual void RenderMe();
       std::list<std::unique_ptr<Node> > nodeList;
       glm::vec3 position;
+      glm::mat4 rotation;
       unsigned int shaderType;
   };
 }
