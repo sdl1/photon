@@ -10,18 +10,17 @@ class TerrainNode : public photon::Node
     TerrainNode(float L, std::function<float(glm::vec3)> height_fn, glm::vec3 origin = glm::vec3(0,0,0));
     virtual ~TerrainNode();
     void updateLOD(glm::vec3 pos, glm::vec3 front);
-    void split(int quadrant);
-    void merge(int quadrant);
+    void split();
+    void merge();
 
   private:
     float L;
     std::function<float(glm::vec3)> height_fn;
     glm::vec3 origin;
     void RenderMe();
-    std::vector<std::unique_ptr<photon::Mesh> > quadrants;
-    bool active[4];
-    TerrainNode const * children[4];
-    glm::vec3 quadrantCentres[4];
+    photon::Mesh *mesh;
+    bool active;
+    glm::vec3 quadrantCentre;
 };
 
 #endif

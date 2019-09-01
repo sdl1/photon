@@ -67,39 +67,20 @@ Mesh *generateMesh(glm::vec3 origin, float sideLength, std::function<float(glm::
 TerrainNode::TerrainNode(float L, std::function<float(glm::vec3)> height_fn, glm::vec3 origin) :
   L(L), height_fn(height_fn), origin(origin)
 {
-  float dx = L/2.0;
-  // Four quadrants
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(0,0,0), dx, height_fn)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(dx,0,0), dx, height_fn)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(dx,dx,0), dx, height_fn)) );
-  quadrants.push_back(std::unique_ptr<Mesh>(generateMesh(origin + glm::vec3(0,dx,0), dx, height_fn)) );
-
-  for(int i=0 ; i<4 ; i++)
-  {
-    active[i] = true;
-  }
-
-  quadrantCentres[0] = glm::vec3(dx/2, dx/2, 0);
-  quadrantCentres[1] = glm::vec3(3*dx/2, dx/2, 0);
-  quadrantCentres[2] = glm::vec3(3*dx/2, 3*dx/2, 0);
-  quadrantCentres[3] = glm::vec3(dx/2, 3*dx/2, 0);
-  for(int i=0 ; i<4 ; i++)
-  {
-    quadrantCentres[i][2] = height_fn(quadrantCentres[i]);
-  }
+  mesh = generateMesh(origin, L, height_fn);
+  active = true;
+  quadrantCentre = origin + glm::vec3(L/2, L/2, 0);
+  quadrantCentre[2] = height_fn(quadrantCentre);
 }
 
 TerrainNode::~TerrainNode()
 {
-  quadrants.clear();
+  delete mesh;
 }
 
 void TerrainNode::RenderMe()
 {
-  for(int i=0 ; i<4 ; i++)
-  {
-    if(active[i]) quadrants[i]->drawStrip();
-  }
+  if(active) mesh->drawStrip();
 }
 
 void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
@@ -110,90 +91,82 @@ void TerrainNode::updateLOD(glm::vec3 pos, glm::vec3 front)
     dynamic_cast<TerrainNode*>(child.get())->updateLOD(pos, front);
   }
 
-  float mindx = 0.1f;
-  float LIM = 1.0f;
+  float minL = 0.1f;
+  float LIM = 0.5f;
   // d is distance from camera to centre of a quadrant
-  // dx is width of a quadrant
-  // W = dx/d ~= apparent width of the quadrant
+  // L is width of a quadrant
+  // W = L/d ~= apparent width of the quadrant
   // We want W to stay ~constant
-  float dx = L/2.0;
 
-  // SPLITTING
-  for(int i=0 ; i<4 ; i++)
+  // Active quadrants are candidates for splitting
+  // Stop splitting at some point
+  if(active && L>minL)
   {
-    // Active quadrants are candidates for splitting
-    if(!active[i]) continue;
-    // Stop splitting at some point
-    if(dx<=mindx) break;
-
     // Split the quadrant if it appears too big
-    float d = length(pos - (origin + quadrantCentres[i]));
-    float W = dx/std::max(d, 1e-6f);
+    float d = length(pos - quadrantCentre);
+    float W = L/std::max(d, 1e-6f);
     if(W>LIM)
     {
-      split(i);
+      split();
+      // If we've split, we don't want to merge by definition
+      return;
     }
   }
 
+
   // MERGING
-  for(int i=0 ; i<4 ; i++)
+  // Non-active quadrants are candidates for merging
+  if(!active)
   {
-    // Non-active quadrants are candidates for merging
-    if(active[i]) continue;
     // A non-active quadrant corresponds to a child TerrainNode.
     // We only merge this quadrant if all the quadrants of the
     // child TerrainNode are active, i.e. the child TerrainNode
     // is not split.
     bool allChildrenActive = true;
-    for(int j=0 ; j<4 ; j++)
+    for(auto & child : nodeList)
     {
-      allChildrenActive = allChildrenActive && children[i]->active[j];
+      allChildrenActive = allChildrenActive && dynamic_cast<TerrainNode*>(child.get())->active;
     }
-    if(!allChildrenActive) continue;
-
-
-    // Merge the quadrant if it doesn't appear too big
-    // It's important that this is consistent with the
-    // splitting criterion, to avoid loops
-    float d = length(pos - (origin + quadrantCentres[i]));
-    float W = dx/std::max(d, 1e-6f);
-    if(W<=LIM)
+    if(allChildrenActive)
     {
-      merge(i);
+      // Merge the quadrant if it doesn't appear too big
+      // It's important that this is consistent with the
+      // splitting criterion, to avoid loops
+      float d = length(pos - quadrantCentre);
+      float W = L/std::max(d, 1e-6f);
+      if(W<=LIM)
+      {
+        merge();
+      }
     }
   }
-
-  // TODO merge
-  // TODO enforce difference of 1 between neighbours
-
-  // TODO remove LOD from things we are not facing
 }
 
-void TerrainNode::split(int quadrant)
+void TerrainNode::split()
 {
-  assert(active[quadrant]);
-  std::cout << "Splitting\n";
+  assert(active);
   // TODO just re-activate children rather than deleting
   float dx = L/2.0;
-  const glm::vec3 offset[] = {glm::vec3(0,0,0),
-                              glm::vec3(dx,0,0),
-                              glm::vec3(dx,dx,0),
-                              glm::vec3(0,dx,0),
-                              };
-  active[quadrant] = false;
-  glm::vec3 neworigin = origin + offset[quadrant];
-  addChild(new TerrainNode(dx, height_fn, neworigin));
-  children[quadrant] = dynamic_cast<TerrainNode*>(nodeList.back().get());
+  const glm::vec3 offset[] = {
+    glm::vec3(0,0,0),
+    glm::vec3(dx,0,0),
+    glm::vec3(dx,dx,0),
+    glm::vec3(0,dx,0),
+  };
+  for(int i=0 ; i<4 ; i++)
+  {
+    glm::vec3 neworigin = origin + offset[i];
+    addChild(new TerrainNode(dx, height_fn, neworigin));
+  }
+  active = false;
 }
 
-void TerrainNode::merge(int quadrant)
+void TerrainNode::merge()
 {
-  assert(!active[quadrant]);
-  std::cout << "Merging\n";
+  assert(!active);
   // TODO just de-activate children rather than deleting
   nodeList.clear();
-  // Re-active this quadrant
-  active[quadrant] = true;
+  active = true;
 }
 
 
