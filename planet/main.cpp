@@ -13,6 +13,7 @@
 
 #include "Photon.h"
 #include "TerrainNode.h"
+#include "Planet.h"
 
 class Scene : public photon::Node
 {
@@ -27,18 +28,21 @@ class Scene : public photon::Node
       {
         float x = pos[0];
         float y = pos[1];
-        return sin(x)*cos(y);
+        return 0.0; //sin(x)*cos(y);
       };
-			terrain = new TerrainNode(20.0, f);
+			//terrain = new TerrainNode(20.0, f);
 			//terrain = new TerrainNode(12e6, f);
+			planet = new Planet(2.0, f);
 
       addChild(this->centrecube);
-      addChild(this->terrain);
+      //addChild(this->terrain);
+      addChild(this->planet);
       addChild(this->light);
     }
 
     photon::shapes::Cube *centrecube;
-    TerrainNode *terrain;
+    //TerrainNode *terrain;
+    Planet *planet;
     photon::shapes::Cube *light;
 };
 
@@ -87,7 +91,8 @@ int main()
   photon.setDefaultRenderTarget();
   while(!photon.shouldExit())
   {
-    scene.terrain->updateLOD(camera.getPos(), camera.getFront());
+    //scene.terrain->updateLOD(camera.getPos(), camera.getFront());
+    scene.planet->updateLOD(camera.getPos(), camera.getFront());
 
     photon.pollEvents();
     photon.processInput();
